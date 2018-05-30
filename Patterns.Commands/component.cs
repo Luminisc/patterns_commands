@@ -9,9 +9,9 @@ namespace Patterns.Commands
 {
     public class State
     {
-        readonly Dictionary<string, object> _state = new Dictionary<string, object>();
-        readonly Stack<Dictionary<string, object>> _states = new Stack<Dictionary<string, object>>();
-        readonly Stack<Dictionary<string, object>> _redoStates = new Stack<Dictionary<string, object>>();
+        private readonly Dictionary<string, object> _state = new Dictionary<string, object>();
+        private readonly Stack<Dictionary<string, object>> _states = new Stack<Dictionary<string, object>>();
+        private readonly Stack<Dictionary<string, object>> _redoStates = new Stack<Dictionary<string, object>>();
         
         public void SetState(IDictionary<string, object> newState)
         {
@@ -33,23 +33,35 @@ namespace Patterns.Commands
 
         public void Undo()
         {
-            var step = _states.Pop();
+            if (_states.Count == 0) return;
+            var stepToReproduce = _states.Pop();
 
+            var stepToStore = _state
+                .Where(x => stepToReproduce.ContainsKey(x.Key))
+                .ToDictionary(x => x.Key, x => x.Value);
+            _redoStates.Push(stepToStore);
+
+            stepToReproduce.Select(x => x).ToList().ForEach(x => _state[x.Key] = x.Value);
         }
 
         public void Redo()
         {
             if (_redoStates.Count == 0) return;
-            var step = _redoStates.Pop();
+            var stepToRevert = _redoStates.Pop();
 
-            step.Select(x => x).ToList().ForEach(x => _state[x.Key] = x.Value);
+            var stepToStore = _state
+                .Where(x => stepToRevert.ContainsKey(x.Key))
+                .ToDictionary(x => x.Key, x => x.Value);
+            _states.Push(stepToStore);
+
+            stepToRevert.Select(x => x).ToList().ForEach(x => _state[x.Key] = x.Value);
         }
 
     }
 
     public class Component
     {
-        State _state = new State();
+        private readonly State _state = new State();
         public object GetState(string key)
         {
             return _state.GetState(key);

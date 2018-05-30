@@ -30,15 +30,16 @@ namespace Patterns.Commands
                     case "1":
                         bool flag = (bool)pd.GetState("bool");
                         flag = !flag;
+                        pd.SetState(new Dictionary<string, object>() { { "bool", flag } });
                         break;
                     case "2":
                         Console.Write("Enter value:");
                         var str = Console.ReadLine();
                         int a = int.Parse(str);
-                        pd.SetState("int", a);
+                        pd.SetState(new Dictionary<string, object>() { { "int", a } });
                         break;
                     case "3":
-                        
+
                         break;
                     case "4":
 
@@ -50,8 +51,17 @@ namespace Patterns.Commands
 
     }
 
-    class PageData: Component
+    class PageData : Component
     {
+        public PageData()
+        {
+            SetState(new Dictionary<string, object>()
+            {
+                { "bool", false },
+                { "int", 1 }
+            });
+        }
+
         public override void Render()
         {
             Console.WriteLine("I\'m cool component!");

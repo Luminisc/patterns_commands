@@ -39,10 +39,10 @@ namespace Patterns.Commands
                         pd.SetState(new Dictionary<string, object>() { { "int", a } });
                         break;
                     case "3":
-
+                        pd.Undo();
                         break;
                     case "4":
-
+                        pd.Redo();
                         break;
                 }
             }
